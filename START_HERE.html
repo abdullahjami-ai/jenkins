@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Docker Fundamentals &mdash; Hands-on Commands</title>
+<style>
+/* ---- dark theme (default) ---------------------------------------- */
+:root{
+--bg:#0b1020;--card:#141d38;--line:#25325c;--txt:#e6ecff;--dim:#93a2cc;
+--accent:#38bdf8;--accent2:#22d3ee;--ok:#34d399;--warn:#fbbf24;--stop:#f87171;
+--head-grad:linear-gradient(135deg,#0e1730,#1b2a52);
+--bar-bg:rgba(11,16,32,.96);
+--panel:#1b2547;--nav-num:#5f6f9e;--tick:#33406e;
+--code-bg:#1d2747;--code-fg:#cfe4ff;
+--term-bg:#070c1c;--term-fg:#8ff0c8;--term-line:#223057;--file-fg:#b9cdf5;
+--btn-bg:#1c2952;--btn-fg:#cfe4ff;
+--out-bg:#0a1124;--out-line:#2b3a6b;--out-fg:#8fa6d8;--note-fg:#a9b8e0;
+--inside-bg:#161436;--inside-accent:#a78bfa;--tag-bg:#3b2f6b;--tag-fg:#c4b5fd;
+--opt-bg:#2a2350;--opt-fg:#c4b5fd;--err-fg:#ffb4a2;
+--tip-bg:#10233a;--tip-line:#1d4c73;
+--warnbox-bg:#2a2010;--warnbox-line:#6b5218;
+--okbox-bg:#0e2a22;--okbox-line:#1c5c47;
+--stopbox-bg:#2c1418;--stopbox-line:#7a2b33;
+--shadow:none;
+--mono:ui-monospace,"Cascadia Mono",Consolas,"SF Mono",Menlo,monospace}
+
+/* ---- light theme -------------------------------------------------- */
+body[data-theme="light"]{
+--bg:#f5f8fd;--card:#ffffff;--line:#dce4f2;--txt:#101b32;--dim:#4d5d7c;
+--accent:#0369a1;--accent2:#0e7490;--ok:#047857;--warn:#b45309;--stop:#b91c1c;
+--head-grad:linear-gradient(135deg,#e7effc,#d8e6fb);
+--bar-bg:rgba(245,248,253,.96);
+--panel:#eaf1fb;--nav-num:#8595b4;--tick:#c2cddf;
+--code-bg:#eaeff8;--code-fg:#1d3a5c;
+--term-bg:#101a30;--term-fg:#7ee2b8;--term-line:#2a3a57;--file-fg:#c3d4f0;
+--btn-bg:#22324f;--btn-fg:#e6edfa;
+--out-bg:#f0f4fb;--out-line:#c8d6ea;--out-fg:#455a7a;--note-fg:#48587a;
+--inside-bg:#f8f5ff;--inside-accent:#7c3aed;--tag-bg:#ece7fe;--tag-fg:#6d28d9;
+--opt-bg:#ece7fe;--opt-fg:#6d28d9;--err-fg:#b3261e;
+--tip-bg:#e7f3fd;--tip-line:#a9d5f2;
+--warnbox-bg:#fdf4e4;--warnbox-line:#e9cb8e;
+--okbox-bg:#e5f6ed;--okbox-line:#a3d9bd;
+--stopbox-bg:#fdeceb;--stopbox-line:#f1b6b1;
+--shadow:0 1px 2px rgba(16,27,50,.06)}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--accent)}
+code{font-family:var(--mono);font-size:.92em;background:var(--code-bg);padding:1px 5px;border-radius:4px;color:var(--code-fg)}
+header.top{background:var(--head-grad);border-bottom:1px solid var(--line);padding:28px 24px 22px}
+header.top .inner{max-width:1180px;margin:0 auto}
+header.top h1{margin:0 0 4px;font-size:29px;letter-spacing:-.4px}
+header.top p{margin:0;color:var(--dim)}
+.osbar{position:sticky;top:0;z-index:50;background:var(--bar-bg);backdrop-filter:blur(8px);
+border-bottom:1px solid var(--line);padding:10px 24px}
+.osbar .inner{max-width:1180px;margin:0 auto;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.osbar b{font-size:14px;color:var(--dim);font-weight:600}
+.osbtn{background:var(--card);border:1px solid var(--line);color:var(--dim);padding:7px 16px;border-radius:999px;
+cursor:pointer;font-size:14px;font-weight:600;font-family:inherit;box-shadow:var(--shadow)}
+.osbtn:hover{border-color:var(--accent)}
+.osbtn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.hint{color:var(--nav-num);font-size:13px}
+.themebtn{margin-left:auto;background:var(--card);border:1px solid var(--line);color:var(--dim);
+padding:7px 15px;border-radius:999px;cursor:pointer;font-size:13.5px;font-weight:600;font-family:inherit;
+white-space:nowrap;box-shadow:var(--shadow)}
+.themebtn:hover{border-color:var(--accent);color:var(--txt)}
+.wrap{max-width:1180px;margin:0 auto;padding:26px 24px 90px;display:grid;grid-template-columns:250px 1fr;gap:34px;align-items:start}
+nav.toc{position:sticky;top:64px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;max-height:calc(100vh - 90px);overflow:auto;box-shadow:var(--shadow)}
+nav.toc a{display:flex;gap:8px;align-items:baseline;padding:7px 9px;border-radius:7px;color:var(--dim);
+text-decoration:none;font-size:13.5px;line-height:1.35}
+nav.toc a:hover{background:var(--panel);color:var(--txt)}
+nav.toc a .n{color:var(--accent);font-weight:700;font-size:12px;min-width:17px}
+nav.toc a .mins{margin-left:auto;font-size:11px;color:var(--nav-num);white-space:nowrap}
+nav.toc a code{background:none;padding:0;color:inherit;font-family:inherit}
+section{margin-bottom:46px;scroll-margin-top:64px}
+.sec-head{display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:6px;flex-wrap:wrap}
+.sec-head .num{background:var(--accent);color:#fff;font-weight:800;border-radius:8px;padding:3px 10px;font-size:14px}
+.sec-head h2{margin:0;font-size:22px;letter-spacing:-.3px}
+.sec-head h2 code{font-size:.85em}
+.sec-head .time{margin-left:auto;color:var(--dim);font-size:13px;white-space:nowrap}
+.optional{background:var(--opt-bg);color:var(--opt-fg);font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;margin-left:9px;vertical-align:middle;letter-spacing:.4px}
+.blurb{color:var(--dim);margin:0 0 18px;font-size:15px}
+.step{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--accent);
+border-radius:10px;padding:15px 17px;margin:14px 0;box-shadow:var(--shadow)}
+.step.inside{border-left-color:var(--inside-accent);background:var(--inside-bg)}
+.step.done{opacity:.45}
+.step-head{display:flex;gap:10px;align-items:flex-start}
+.step h3{margin:0 0 6px;font-size:16.5px;font-weight:650;letter-spacing:-.2px}
+.tick{cursor:pointer;color:var(--tick);font-size:17px;line-height:1.35;user-select:none;flex:none}
+.tick:hover{color:var(--ok)}
+.step.done .tick{color:var(--ok)}
+.tag-inside{background:var(--tag-bg);color:var(--tag-fg);font-size:10.5px;font-weight:700;padding:2px 7px;
+border-radius:999px;margin-left:9px;vertical-align:middle;letter-spacing:.4px;white-space:nowrap}
+.why{margin:0 0 11px;color:var(--dim);font-size:14.5px}
+.cmdwrap{position:relative;display:flex;align-items:stretch;background:var(--term-bg);border:1px solid var(--term-line);border-radius:8px;overflow:hidden}
+pre.cmd{margin:0;padding:12px 14px;overflow-x:auto;flex:1;font-family:var(--mono);font-size:14px;color:var(--term-fg)}
+pre.cmd code{background:none;padding:0;color:inherit;font-size:inherit;white-space:pre}
+.copy{flex:none;background:var(--btn-bg);border:none;border-left:1px solid var(--term-line);color:var(--btn-fg);
+padding:0 18px;cursor:pointer;font-size:13px;font-weight:650;font-family:inherit;letter-spacing:.2px}
+.copy:hover{background:var(--accent);color:#fff}
+.copy.ok{background:var(--ok);color:#fff}
+.copy.small{padding:6px 14px;border-left:none;border-radius:6px}
+.out{margin-top:9px}
+.out summary{cursor:pointer;color:var(--dim);font-size:13.5px;user-select:none}
+.out summary:hover{color:var(--txt)}
+.outpre{margin:7px 0 0;background:var(--out-bg);border:1px dashed var(--out-line);border-radius:7px;padding:11px 13px;
+overflow-x:auto;font-family:var(--mono);font-size:13px;color:var(--out-fg);white-space:pre}
+.note{margin:9px 0 0;font-size:13.5px;color:var(--note-fg)}
+.skipnote{margin:0;font-size:14px;color:var(--nav-num);font-style:italic}
+.box{border-radius:10px;padding:13px 16px;margin:16px 0;border:1px solid;font-size:14.8px}
+.box p:first-of-type{margin-top:4px}.box p:last-child,.box ul:last-child,.box ol:last-child{margin-bottom:0}
+.box ul,.box ol{margin:6px 0;padding-left:22px}.box li{margin:3px 0}
+.box-title{font-weight:700;margin-bottom:2px;font-size:15px}
+.box.tip{background:var(--tip-bg);border-color:var(--tip-line)}.box.tip .box-title{color:var(--accent2)}
+.box.warn{background:var(--warnbox-bg);border-color:var(--warnbox-line)}.box.warn .box-title{color:var(--warn)}
+.box.ok{background:var(--okbox-bg);border-color:var(--okbox-line)}.box.ok .box-title{color:var(--ok)}
+.box.stop{background:var(--stopbox-bg);border-color:var(--stopbox-line)}.box.stop .box-title{color:var(--stop)}
+.say{margin:14px 0;font-size:15.3px}
+.say h4{margin:20px 0 6px;font-size:17px;color:var(--accent2)}
+.say ol,.say ul{padding-left:22px}
+.filebox{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:16px 0}
+.filebox-head{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--panel);
+padding:9px 13px;font-size:13.5px;font-family:var(--mono);color:var(--txt)}
+.filepre{margin:0;background:var(--term-bg);padding:14px;overflow-x:auto;font-family:var(--mono);font-size:13px;
+color:var(--file-fg);white-space:pre;line-height:1.55}
+table.cheat,table.trouble{width:100%;border-collapse:collapse;font-size:14.3px;margin-top:8px}
+table.cheat td,table.trouble td,table.trouble th{border-bottom:1px solid var(--line);padding:9px 11px;vertical-align:top;text-align:left}
+table.cheat td:first-child{width:46%}
+table.cheat code{background:none;color:var(--accent2);font-size:13.5px;padding:0}
+table.cheat code i{color:var(--warn);font-style:normal}
+table.cheat tr.grouprow td{background:var(--panel);color:var(--accent2);font-weight:700;font-size:12px;letter-spacing:1.2px;padding:7px 11px}
+table.trouble th{background:var(--panel);color:var(--accent2);font-size:12.5px;letter-spacing:.8px;text-transform:uppercase}
+table.trouble td.err{width:42%;font-family:var(--mono);font-size:13px;color:var(--err-fg)}
+table.trouble td.err code{color:var(--err-fg);background:none;padding:0}
+.osnote{font-family:system-ui,sans-serif;color:var(--dim);font-style:italic}
+footer{border-top:1px solid var(--line);padding:22px 24px;color:var(--nav-num);font-size:13.5px;text-align:center}
+body[data-os="win"] .os-nix{display:none!important}
+body[data-os="nix"] .os-win{display:none!important}
+@media(max-width:900px){
+ .wrap{grid-template-columns:1fr;padding:18px 15px 60px}
+ nav.toc{position:static;max-height:none;order:-1}
+ .sec-head .time{margin-left:0;width:100%}
+ pre.cmd{font-size:13px}
+ .themebtn{margin-left:0}
+ .hint{display:none}
+}
+@media print{
+ .osbar,nav.toc{display:none}
+ .wrap{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body data-os="win" data-theme="dark">
+<header class="top"><div class="inner">
+  <h1>&#128051; Docker Fundamentals &mdash; hands-on sheet</h1>
+  <p>Week 18 &middot; Day 1 &nbsp;|&nbsp; Click <b>Copy</b>, paste into your terminal, press Enter.</p>
+</div></header>
+
+<div class="osbar"><div class="inner">
+  <b>I am using:</b>
+  <button class="osbtn" type="button" data-os="win">&#129302; Windows (PowerShell)</button>
+  <button class="osbtn" type="button" data-os="nix">&#128039; Mac / Linux</button>
+  <span class="hint">&larr; pick this first, the commands change</span>
+  <button class="themebtn" id="themebtn" type="button">&#9728; Day mode</button>
+</div></div>
+
+<div class="wrap">
+  <nav class="toc"><a href="#start"><span class="n">0</span>How to use this page<span class="mins">2 min</span></a><a href="#check"><span class="n">1</span>Check that Docker is alive<span class="mins">3 min</span></a><a href="#install"><span class="n">1b</span>Installing Docker (only if Step 1 failed)<span class="mins">varies</span></a><a href="#terminal"><span class="n">2</span>Open a terminal in this folder<span class="mins">3 min</span></a><a href="#local"><span class="n">3</span>The old way &mdash; run the app on your own laptop<span class="mins">10 min</span></a><a href="#hello"><span class="n">4</span>Your first container<span class="mins">5 min</span></a><a href="#images"><span class="n">5</span>Images: download and inspect them<span class="mins">7 min</span></a><a href="#nginx"><span class="n">6</span>Run a real server &amp; map a port<span class="mins">10 min</span></a><a href="#lifecycle"><span class="n">7</span>Container lifecycle: stop, start, remove<span class="mins">8 min</span></a><a href="#inside"><span class="n">8</span>Go inside a container<span class="mins">5 min</span></a><a href="#volumes"><span class="n">9</span>Volumes: let a container see your files<span class="mins">6 min</span></a><a href="#build"><span class="n">10</span>Build your own image<span class="mins">18 min</span></a><a href="#cache"><span class="n">11</span>Layer caching &mdash; why the second build is instant<span class="mins">6 min</span></a><a href="#cleanup"><span class="n">12</span>Clean up<span class="mins">5 min</span></a><a href="#cheatsheet"><span class="n">13</span>Cheat sheet<span class="mins">&mdash;</span></a><a href="#challenge"><span class="n">14</span>Challenge / homework<span class="mins">&mdash;</span></a><a href="#trouble"><span class="n">15</span>Troubleshooting &mdash; every error you might hit<span class="mins">&mdash;</span></a></nav>
+  <main><section id="start"><div class="sec-head"><span class="num">0</span><h2>How to use this page</h2><span class="time">&#9201; 2 min</span></div><p class="blurb">Read this bit once, then never again.</p><div class="say"><p>Every grey box below is a command. Click <b>Copy</b>, paste it into your
+        terminal, press Enter. Nothing on this page runs by itself &mdash; you are always in control.</p></div><div class="box tip"><div class="box-title">&#128161; Pick your system first &#9757;</div><p>Use the <b>Windows / Mac &amp; Linux</b> switch at the
+        top of this page. Some commands are different on each system, and the page will show you only the ones
+        that work on <i>your</i> machine. Get this wrong and half the commands will fail.</p></div><div class="box warn"><div class="box-title">&#9888; Windows users: use <b>PowerShell</b></div><p>Not Git Bash, not the old <code>cmd</code>
+        window. PowerShell handles interactive containers correctly and everything on this page is tested for it.</p></div><div class="say"><p>Grey boxes with a <span class="tag-inside">inside container</span> tag are typed
+        <i>inside</i> a running container, not in your normal terminal. You will always be told when you go in
+        and how to get out.</p></div></section><section id="check"><div class="sec-head"><span class="num">1</span><h2>Check that Docker is alive</h2><span class="time">&#9201; 3 min</span></div><p class="blurb">Two commands. If both work, you are ready for the whole class.</p><div class="step"><div class="step-head"><span class="tick" data-tick="c1" title="mark as done">&#10003;</span><h3>Is the Docker command installed?</h3></div><p class="why">Asks Docker to print its version number. This only proves the <b>client</b> (the <code>docker</code> command) exists.</p><div class="cmdwrap "><pre class="cmd"><code>docker --version</code></pre><button class="copy" type="button" data-copy="docker --version">Copy</button></div><details class="out"><summary>What you should see</summary><pre class="outpre">Docker version 27.3.1, build ce12230</pre></details></div><div class="step"><div class="step-head"><span class="tick" data-tick="c2" title="mark as done">&#10003;</span><h3>Is the Docker engine running?</h3></div><p class="why">Lists running containers. It should print a table with <b>headers only</b> and no rows &mdash; that empty table is the proof that your <code>docker</code> command reached the Docker engine running in the background.</p><div class="cmdwrap "><pre class="cmd"><code>docker ps</code></pre><button class="copy" type="button" data-copy="docker ps">Copy</button></div><details class="out"><summary>What you should see</summary><pre class="outpre">CONTAINER ID   IMAGE   COMMAND   CREATED   STATUS   PORTS   NAMES</pre></details></div><div class="box ok"><div class="box-title">&#9989; Both worked?</div><p>Skip the next section entirely and jump straight to
+        <a href="#terminal">Step 2</a>.</p></div><div class="box warn"><div class="box-title">&#9888; Something failed?</div><p>Open the next section &mdash; it has the fix for every common error.
+        If you are stuck for more than 3 minutes, raise your hand and switch to
+        <a href="https://labs.play-with-docker.com" target="_blank" rel="noopener">Play with Docker</a>
+        (a free Docker terminal in your browser, needs a free Docker Hub account) so you can still follow along.</p></div></section><section id="install"><div class="sec-head"><span class="num">1b</span><h2>Installing Docker (only if Step 1 failed)<span class="optional">optional</span></h2><span class="time">&#9201; varies</span></div><p class="blurb">Ideally you did this before class &mdash; it needs a restart and a big download.</p><div class="box warn"><div class="box-title">&#9888; This takes 15&ndash;30 minutes and a reboot on Windows</div><p>If it is not installed yet, do not try to race the class. Start the installer, and use
+            <a href="https://labs.play-with-docker.com" target="_blank" rel="noopener">labs.play-with-docker.com</a>
+            in your browser to follow along today. Finish the install at home.</p></div><div class="say"><h4 class="os-win">Windows &mdash; Docker Desktop (3 parts + one restart)</h4>
+        <h4 class="os-nix">Ubuntu / Linux &mdash; the official install script (4 parts, no restart)</h4></div><div class="step"><div class="step-head"><span class="tick" data-tick="c3" title="mark as done">&#10003;</span><h3>Part 1 &mdash; <span class='os-win'>turn on WSL 2</span><span class='os-nix'>download the official install script</span></h3></div><p class="why"><span class='os-win'>Docker Desktop runs containers inside a tiny Linux machine called WSL 2. This command installs it. <b>Restart your PC afterwards.</b> Run it in an <b>Administrator</b> terminal (right-click Start &rarr; Terminal (Admin)).</span><span class='os-nix'>Downloads the install script published by Docker themselves. Nothing is executed yet.</span></p><div class="cmdwrap os-win"><pre class="cmd"><code>wsl --install</code></pre><button class="copy" type="button" data-copy="wsl --install">Copy</button></div><div class="cmdwrap os-nix"><pre class="cmd"><code>curl -fsSL https://get.docker.com -o get-docker.sh</code></pre><button class="copy" type="button" data-copy="curl -fsSL https://get.docker.com -o get-docker.sh">Copy</button></div></div><div class="step"><div class="step-head"><span class="tick" data-tick="c4" title="mark as done">&#10003;</span><h3>Part 2 &mdash; <span class='os-win'>install Docker Desktop</span><span class='os-nix'>run the script</span></h3></div><p class="why"><span class='os-win'>There is no command for this one: download the installer from <a href='https://www.docker.com/products/docker-desktop/' target='_blank' rel='noopener'>docker.com/products/docker-desktop</a>, run it, keep every default, then <b>launch Docker Desktop</b> and wait until the whale icon in the taskbar stops animating.</span><span class='os-nix'>Installs the Docker engine. Takes a couple of minutes.</span></p><div class="cmdwrap os-win"><pre class="cmd"><code># nothing to copy - use the download link above</code></pre><button class="copy" type="button" data-copy="# nothing to copy - use the download link above">Copy</button></div><div class="cmdwrap os-nix"><pre class="cmd"><code>sudo sh get-docker.sh</code></pre><button class="copy" type="button" data-copy="sudo sh get-docker.sh">Copy</button></div></div><div class="step"><div class="step-head"><span class="tick" data-tick="c5" title="mark as done">&#10003;</span><h3>Part 3 &mdash; <span class='os-win'>check it worked</span><span class='os-nix'>let your user run Docker without sudo</span></h3></div><p class="why"><span class='os-win'>With Docker Desktop open, this should now print a version number.</span><span class='os-nix'>Adds you to the <code>docker</code> group so you do not have to type <code>sudo</code> before every command.</span></p><div class="cmdwrap os-win"><pre class="cmd"><code>docker --version</code></pre><button class="copy" type="button" data-copy="docker --version">Copy</button></div><div class="cmdwrap os-nix"><pre class="cmd"><code>sudo usermod -aG docker $USER</code></pre><button class="copy" type="button" data-copy="sudo usermod -aG docker $USER">Copy</button></div></div><div class="step"><div class="step-head"><span class="tick" data-tick="c6" title="mark as done">&#10003;</span><h3>Part 4 &mdash; apply the new group <span class='os-win'>(Linux only)</span></h3></div><p class="why"><span class='os-win'>Nothing to do on Windows &mdash; you are done, go back to Step 1.</span><span class='os-nix'>Group membership only applies to new sessions. This starts one without logging out. Then test with <code>docker run hello-world</code>.</span></p><div class="cmdwrap os-nix"><pre class="cmd"><code>newgrp docker</code></pre><button class="copy" type="button" data-copy="newgrp docker">Copy</button></div></div><div class="box tip"><div class="box-title">&#128161; Linux: still getting <i>permission denied</i>?</div><p>Log out and log back in (or reboot). Group membership only applies to new login sessions.</p></div></section><section id="terminal"><div class="sec-head"><span class="num">2</span><h2>Open a terminal in this folder</h2><span class="time">&#9201; 3 min</span></div><p class="blurb">Everything from here on assumes your terminal is sitting in the project folder.</p><div class="say"><p class="os-win">Open the unzipped folder in File Explorer. Hold <b>Shift</b>, right-click on
+        empty space inside the folder, choose <b>&ldquo;Open PowerShell window here&rdquo;</b> (or
+        <b>&ldquo;Open in Terminal&rdquo;</b>). No typing of long paths needed.</p>
+        <p class="os-nix">Open the unzipped folder in your file manager, right-click on empty space and choose
+        <b>&ldquo;Open in Terminal&rdquo;</b>.</p></div><div class="step"><div class="step-head"><span class="tick" data-tick="c7" title="mark as done">&#10003;</span><h3>Move into the project folder</h3></div><p class="why">The <code>project</code> folder holds the app we are going to containerise. Every later command expects you to be in here.</p><div class="cmdwrap "><pre class="cmd"><code>cd project</code></pre><button class="copy" type="button" data-copy="cd project">Copy</button></div></div><div class="step"><div class="step-head"><span class="tick" data-tick="c8" title="mark as done">&#10003;</span><h3>Check you are in the right place</h3></div><p class="why">You should see <code>app.py</code>, <code>Dockerfile</code>, <code>requirements.txt</code>, <code>whoami.py</code>. If you do not, you are in the wrong folder &mdash; fix it now, not in ten minutes.</p><div class="cmdwrap os-win"><pre class="cmd"><code>dir</code></pre><button class="copy" type="button" data-copy="dir">Copy</button></div><div class="cmdwrap os-nix"><pre class="cmd"><code>ls -l</code></pre><button class="copy" type="button" data-copy="ls -l">Copy</button></div><details class="out"><summary>What you should see</summary><pre class="outpre">Dockerfile   app.py   requirements.txt   whoami.py</pre></details></div></section><section id="local"><div class="sec-head"><span class="num">3</span><h2>The old way &mdash; run the app on your own laptop<span class="optional">optional</span></h2><span class="time">&#9201; 10 min</span></div><p class="blurb">Before Docker, this was the routine. Feel the pain first, then the fix makes sense.</p><div class="say"><p>Our app is a small FastAPI web service. To run it the traditional way you need the right
+        Python version, a virtual environment, and the right packages &mdash; <b>on every single machine that
+        will ever run it</b>. Let's do it once.</p></div><div class="step"><div class="step-head"><span class="tick" data-tick="c9" title="mark as done">&#10003;</span><h3>Create a virtual environment</h3></div><p class="why">A private folder (<code>.venv</code>) holding a copy of Python and this project's packages, so they never clash with your other projects.</p><div class="cmdwrap os-win"><pre class="cmd"><code>py -m venv .venv</code></pre><button class="copy" type="button" data-copy="py -m venv .venv">Copy</button></div><div class="cmdwrap os-nix"><pre class="cmd"><code>python3 -m venv .venv</code></pre><button class="copy" type="button" data-copy="python3 -m venv .venv">Copy</button></div></div><div class="step"><div class="step-head"><span class="tick" data-tick="c10" title="mark as done">&#10003;</span><h3>Allow the activation script to run (this window only)</h3></div><p class="why">Windows blocks scripts by default. This unblocks it for the current PowerShell window only &mdash; it changes nothing permanently.</p><div class="cmdwrap os-win"><pre class="cmd"><code>Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force</code></pre><button class="copy" type="button" data-copy="Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force">Copy</button></div><p class="skipnote os-nix">Not needed on Mac or Linux &mdash; skip to the next command.</p></div><div class="step"><div class="step-head"><span class="tick" data-tick="c11" title="mark as done">&#10003;</span><h3>Activate the virtual environment</h3></div><p class="why">Switches your terminal to use the project's private Python. You will see <code>(.venv)</code> appear at the start of your prompt &mdash; that is how you know it worked.</p><div class="cmdwrap os-win"><pre class="cmd"><code>.\.venv\Scripts\Activate.ps1</code></pre><button class="copy" type="button" data-copy=".\.venv\Scripts\Activate.ps1">Copy</button></div><div class="cmdwrap os-nix"><pre class="cmd"><code>source .venv/bin/activate</code></pre><button class="copy" type="button" data-copy="source .venv/bin/activate">Copy</button></div><details class="out"><summary>What you should see</summary><pre class="outpre">(.venv) PS C:\...\project&gt;</pre></details></div><div class="step"><div class="step-head"><span class="tick" data-tick="c12" title="mark as done">&#10003;</span><h3>Install every dependency in one go</h3></div><p class="why">Reads <code>requirements.txt</code> and installs exactly those packages at exactly those versions.</p><div class="cmdwrap os-win"><pre class="cmd"><code>python -m pip install -r requirements.txt</code></pre><button class="copy" type="button" data-copy="python -m pip install -r requirements.txt">Copy</button></div><div class="cmdwrap os-nix"><pre class="cmd"><code>pip install -r requirements.txt</code></pre><button class="copy" type="button" data-copy="pip install -r requirements.txt">Copy</button></div><details class="out"><summary>What you should see</summary><pre class="outpre">Successfully installed fastapi-0.141.1 uvicorn-0.53.0 ...</pre></details></div><div class="step"><div class="step-head"><span class="tick" data-tick="c13" title="mark as done">&#10003;</span><h3>Start the app</h3></div><p class="why">Runs the web server. Now open <a href='http://localhost:8000' target='_blank' rel='noopener'>http://localhost:8000</a> in your browser.</p><div class="cmdwrap os-win"><pre class="cmd"><code>python -m uvicorn app:app --port 8000</code></pre><button class="copy" type="button" data-copy="python -m uvicorn app:app --port 8000">Copy</button></div><div class="cmdwrap os-nix"><pre class="cmd"><code>uvicorn app:app --port 8000</code></pre><button class="copy" type="button" data-copy="uvicorn app:app --port 8000">Copy</button></div><details class="out"><summary>What you should see</summary><pre class="outpre">Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)</pre></details></div><div class="box stop"><div class="box-title">&#9209; Stop it before moving on</div><p>Press <b>Ctrl + C</b> in the terminal to stop the server.
+        Then type <code>deactivate</code> and press Enter to leave the virtual environment.</p></div><div class="box tip"><div class="box-title">&#128161; So what was the problem?</div><p>That worked&hellip; <i>on your machine</i>. Hand this folder to
+        someone with Python 3.9, or a locked-down work laptop, or a Linux server with no compiler, and the install
+        breaks. The app needs a specific Python, specific packages, specific system libraries &mdash; and
+        <code>requirements.txt</code> only describes one of those three.</p>
+        <p><b>Docker packages all three.</b> That is the entire idea. Let's go.</p></div></section><section id="hello"><div class="sec-head"><span class="num">4</span><h2>Your first container</h2><span class="time">&#9201; 5 min</span></div><p class="blurb">The smallest possible container, so you can watch the whole workflow happen.</p><div class="step"><div class="step-head"><span class="tick" data-tick="c14" title="mark as done">&#10003;</span><h3>Run the hello-world container</h3></div><p class="why">Docker looks for the <code>hello-world</code> image on your machine, does not find it, downloads it from Docker Hub, starts a container from it, prints a message, and the container exits.</p><div class="cmdwrap "><pre class="cmd"><code>docker run hello-world</code></pre><button class="copy" type="button" data-copy="docker run hello-world">Copy</button></div><details class="out"><summary>What you should see</summary><pre class="outpre">Hello from Docker!
+This message shows that your installation appears to be working correctly.</pre></details></div><div class="box tip"><div class="box-title">&#128161; What actually happened, in order</div><ol>
+          <li>Looked for the image locally &rarr; not found</li>
+          <li><b>Pulled</b> it from Docker Hub (the app store for images)</li>
+          <li><b>Created</b> a container from that image</li>
+          <li><b>Ran</b> it &rarr; it printed the message</li>
+          <li><b>Exited</b> &mdash; the container stopped, but it still exists</li>
+        </ol>
+        <p>That is the whole Docker workflow you will repeat all day: <b>pull &rarr; run &rarr; stop &rarr; remove</b>.</p></div><div class="step"><div class="step-head"><span class="tick" data-tick="c15" title="mark as done">&#10003;</span><h3>Run it a second time</h3></div><p class="why">Notice how much faster it is. The image is already on your disk, so there is nothing to download. This is the first hint of why Docker feels fast.</p><div class="cmdwrap "><pre class="cmd"><code>docker run hello-world</code></pre><button class="copy" type="button" data-copy="docker run hello-world">Copy</button></div></div></section><section id="images"><div class="sec-head"><span class="num">5</span><h2>Images: download and inspect them</h2><span class="time">&#9201; 7 min</span></div><p class="blurb">An image is a read-only template. A container is a running copy of it.</p><div class="step"><div class="step-head"><span class="tick" data-tick="c16" title="mark as done">&#10003;</span><h3>Download the Python image we will use later</h3></div><p class="why"><code>pull</code> downloads an image <b>without</b> running it. <code>3.11-slim</code> is the tag: Python 3.11, slim variant (~150&nbsp;MB instead of ~1&nbsp;GB).</p><div class="cmdwrap "><pre class="cmd"><code>docker pull python:3.11-slim</code></pre><button class="copy" type="button" data-copy="docker pull python:3.11-slim">Copy</button></div><details class="out"><summary>What you should see</summary><pre class="outpre">3.11-slim: Pulling from library/python
+Status: Downloaded newer image for python:3.11-slim</pre></details></div><div class="step"><div class="step-head"><span class="tick" data-tick="c17" title="mark as done">&#10003;</span><h3>Download a tiny web server image</h3></div><p class="why">nginx is a real production web server. The <code>alpine</code> tag is a stripped-down build, about 20&nbsp;MB.</p><div class="cmdwrap "><pre class="cmd"><code>docker pull nginx:alpine</code></pre><button class="copy" type="button" data-copy="docker pull nginx:alpine">Copy</button></div></div><div class="step"><div class="step-head"><span class="tick" data-tick="c18" title="mark as done">&#10003;</span><h3>List the images you now own</h3></div><p class="why">Columns: REPOSITORY (name), TAG (version), IMAGE&nbsp;ID (unique id), CREATED, SIZE.</p><div class="cmdwrap "><pre class="cmd"><code>docker images</code></pre><button class="copy" type="button" data-copy="docker images">Copy</button></div><details class="out"><summary>What you should see</summary><pre class="outpre">REPOSITORY   TAG         IMAGE ID       CREATED       SIZE
+python       3.11-slim   1a2b3c4d5e6f   2 weeks ago   150MB
+nginx        alpine      9f8e7d6c5b4a   3 weeks ago   48MB
+hello-world  latest      d2c94e258dcb   8 months ago  13.3kB</pre></details></div><div class="box tip"><div class="box-title">&#128161; Tags matter more than people think</div><ul>
+          <li><code>python:3.11</code> &mdash; full image, every tool included (~1&nbsp;GB)</li>
+          <li><code>python:3.11-slim</code> &mdash; minimal but fully compatible <b>&larr; use this</b></li>
+          <li><code>python:3.11-alpine</code> &mdash; smallest, but some packages refuse to install</li>
+          <li><code>python:latest</code> &mdash; whatever is newest <b>today</b>. Never use in production: your build changes under your feet.</li>
+        </ul></div></section><section id="nginx"><div class="sec-head"><span class="num">6</span><h2>Run a real server &amp; map a port</h2><span class="time">&#9201; 10 min</span></div><p class="blurb">Port mapping is the one thing everybody gets wrong on day one. We will make it obvious.</p><div class="step"><div class="step-head"><span class="tick" data-tick="c19" title="mark as done">&#10003;</span><h3>Start nginx in the background</h3></div><p class="why"><code>-d</code> detached, runs in the background &middot; <code>-p 8080:80</code> connects port <b>8080 on your laptop</b> to port <b>80 inside the container</b> &middot; <code>--name</code> gives it a name you can remember instead of a random id.</p><div class="cmdwrap "><pre class="cmd"><code>docker run -d -p 8080:80 --name my-nginx nginx:alpine</code></pre><button class="copy" type="button" data-copy="docker run -d -p 8080:80 --name my-nginx nginx:alpine">Copy</button></div><details class="out"><summary>What you should see</summary><pre class="outpre">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</pre></details></div><div class="box ok"><div class="box-title">&#9989; Now open it in your browser</div><p><a href="http://localhost:8080" target="_blank" rel="noopener">http://localhost:8080</a>
+            &mdash; you should see <b>&ldquo;Welcome to nginx!&rdquo;</b></p>
+            <p>You did not install nginx. You have no config files. It took two seconds. That is the point.</p></div><div class="box tip"><div class="box-title">&#128161; The <code>-p</code> rule, once and for all</div><p><code>-p &lt;your laptop&gt;:&lt;inside the container&gt;</code></p>
+            <p>A container is a sealed box. Nothing gets in unless you open a door. <code>-p 8080:80</code> says
+            &ldquo;knocks on <b>my</b> port 8080 get delivered to port <b>80</b> inside&rdquo;. Swap the numbers around
+            and nothing works &mdash; that is the #1 day-one mistake.</p></div><div class="step"><div class="step-head"><span class="tick" data-tick="c20" title="mark as done">&#10003;</span><h3>See it running</h3></div><p class="why">Lists <b>running</b> containers. Look at the PORTS column &mdash; it shows your mapping.</p><div class="cmdwrap "><pre class="cmd"><code>docker ps</code></pre><button class="copy" type="button" data-copy="docker ps">Copy</button></div></div><div class="step"><div class="step-head"><span class="tick" data-tick="c21" title="mark as done">&#10003;</span><h3>Read the server's logs</h3></div><p class="why">Everything the app printed. Refresh the browser page a few times first, then run this again &mdash; you will see your own requests appear. This is the first thing you check when something breaks.</p><div class="cmdwrap "><pre class="cmd"><code>docker logs my-nginx</code></pre><button class="copy" type="button" data-copy="docker logs my-nginx">Copy</button></div></div><div class="step"><div class="step-head"><span class="tick" data-tick="c22" title="mark as done">&#10003;</span><h3>Follow the logs live (optional)</h3></div><p class="why"><code>-f</code> streams new log lines as they happen. Refresh the browser and watch. Press <b>Ctrl + C</b> to stop watching &mdash; this does <b>not</b> stop the container.</p><div class="cmdwrap "><pre class="cmd"><code>docker logs -f my-nginx</code></pre><button class="copy" type="button" data-copy="docker logs -f my-nginx">Copy</button></div></div></section><section id="lifecycle"><div class="sec-head"><span class="num">7</span><h2>Container lifecycle: stop, start, remove</h2><span class="time">&#9201; 8 min</span></div><p class="blurb">Stopped is not deleted. That difference confuses everybody once.</p><div class="step"><div class="step-head"><span class="tick" data-tick="c23" title="mark as done">&#10003;</span><h3>Stop the container</h3></div><p class="why">Politely asks the process inside to shut down. The container stops but still exists on disk.</p><div class="cmdwrap "><pre class="cmd"><code>docker stop my-nginx</code></pre><button class="copy" type="button" data-copy="docker stop my-nginx">Copy</button></div></div><div class="step"><div class="step-head"><span class="tick" data-tick="c24" title="mark as done">&#10003;</span><h3>Prove it is gone from the running list</h3></div><p class="why">Empty table. The browser tab at :8080 will also stop working now.</p><div class="cmdwrap "><pre class="cmd"><code>docker ps</code></pre><button class="copy" type="button" data-copy="docker ps">Copy</button></div></div><div class="step"><div class="step-head"><span class="tick" data-tick="c25" title="mark as done">&#10003;</span><h3>Now list ALL containers, including stopped ones</h3></div><p class="why"><code>-a</code> = all. There is your stopped nginx, status <code>Exited</code>. It still takes up disk space &mdash; stopped containers are not deleted containers.</p><div class="cmdwrap "><pre class="cmd"><code>docker ps -a</code></pre><button class="copy" type="button" data-copy="docker ps -a">Copy</button></div></div><div class="step"><div class="step-head"><span class="tick" data-tick="c26" title="mark as done">&#10003;</span><h3>Start it again</h3></div><p class="why">Same container, same settings, back to life. No re-download, no re-typing of the port mapping.</p><div class="cmdwrap "><pre class="cmd"><code>docker start my-nginx</code></pre><button class="copy" type="button" data-copy="docker start my-nginx">Copy</button></div><p class="note">&#9432; Refresh <a href='http://localhost:8080' target='_blank' rel='noopener'>http://localhost:8080</a> &mdash; it is back.</p></div><div class="step"><div class="step-head"><span class="tick" data-tick="c27" title="mark as done">&#10003;</span><h3>Delete it for good</h3></div><p class="why"><code>-f</code> stops it first if it is running, then removes it. Without <code>-f</code> you must stop it before removing.</p><div class="cmdwrap "><pre class="cmd"><code>docker rm -f my-nginx</code></pre><button class="copy" type="button" data-copy="docker rm -f my-nginx">Copy</button></div></div><div class="step"><div class="step-head"><span class="tick" data-tick="c28" title="mark as done">&#10003;</span><h3>Confirm it is really gone</h3></div><p class="why">No more <code>my-nginx</code> row. The <i>image</i> is still on your disk though &mdash; only the container was deleted.</p><div class="cmdwrap "><pre class="cmd"><code>docker ps -a</code></pre><button class="copy" type="button" data-copy="docker ps -a">Copy</button></div></div></section><section id="inside"><div class="sec-head"><span class="num">8</span><h2>Go inside a container</h2><span class="time">&#9201; 5 min</span></div><p class="blurb">A container is a real little Linux machine. Let's walk around in it.</p><div class="step"><div class="step-head"><span class="tick" data-tick="c29" title="mark as done">&#10003;</span><h3>Open a shell inside a Python container</h3></div><p class="why"><code>-it</code> = interactive terminal (you can type in it) &middot; <code>--rm</code> = delete the container automatically when you leave &middot; <code>bash</code> = the program to run instead of the default one.</p><div class="cmdwrap "><pre class="cmd"><code>docker run -it --rm python:3.11-slim bash</code></pre><button class="copy" type="button" data-copy="docker run -it --rm python:3.11-slim bash">Copy</button></div><details class="out"><summary>What you should see</summary><pre class="outpre">root@e3b0c4429813:/#   &lt;- your prompt changed! you are inside now</pre></details></div><div class="say"><p>Your prompt changed &mdash; <b>you are now typing inside the container.</b>
+        Try these (they run in the container, not on your laptop):</p></div><div class="step inside"><div class="step-head"><span class="tick" data-tick="c30" title="mark as done">&#10003;</span><h3>Which Python is in here?<span class="tag-inside">inside container</span></h3></div><p class="why">The image ships with Python 3.11 regardless of what is installed on your laptop.</p><div class="cmdwrap "><pre class="cmd"><code>python --version</code></pre><button class="copy" type="button" data-copy="python --version">Copy</button></div></div><div class="step inside"><div class="step-head"><span class="tick" data-tick="c31" title="mark as done">&#10003;</span><h3>What operating system is this?<span class="tag-inside">inside container</span></h3></div><p class="why">Debian Linux &mdash; even if your laptop is Windows. The container brings its own OS user-space.</p><div class="cmdwrap "><pre class="cmd"><code>cat /etc/os-release</code></pre><button class="copy" type="button" data-copy="cat /etc/os-release">Copy</button></div></div><div class="step inside"><div class="step-head"><span class="tick" data-tick="c32" title="mark as done">&#10003;</span><h3>Look around the filesystem<span class="tag-inside">inside container</span></h3></div><p class="why">A complete Linux file tree that has nothing to do with your laptop's files.</p><div class="cmdwrap "><pre class="cmd"><code>ls /</code></pre><button class="copy" type="button" data-copy="ls /">Copy</button></div></div><div class="step inside"><div class="step-head"><span class="tick" data-tick="c33" title="mark as done">&#10003;</span><h3>Prove it is isolated<span class="tag-inside">inside container</span></h3></div><p class="why">Create a file. It exists only inside this container, and disappears forever when you exit (because of <code>--rm</code>).</p><div class="cmdwrap "><pre class="cmd"><code>touch /i-was-here.txt &amp;&amp; ls /</code></pre><button class="copy" type="button" data-copy="touch /i-was-here.txt &amp;&amp; ls /">Copy</button></div></div><div class="step inside"><div class="step-head"><span class="tick" data-tick="c34" title="mark as done">&#10003;</span><h3>Leave the container<span class="tag-inside">inside container</span></h3></div><p class="why">Ends the shell, which ends the container's main process, which stops the container. <b>Container lifetime = the lifetime of its main process.</b></p><div class="cmdwrap "><pre class="cmd"><code>exit</code></pre><button class="copy" type="button" data-copy="exit">Copy</button></div></div><div class="box tip"><div class="box-title">&#128161; Why that matters</div><p>A container is not a virtual machine that boots and idles. It runs
+        <b>one process</b>. When that process ends, the container stops. That is why a container running
+        <code>bash</code> dies the moment you type <code>exit</code>.</p></div></section><section id="volumes"><div class="sec-head"><span class="num">9</span><h2>Volumes: let a container see your files</h2><span class="time">&#9201; 6 min</span></div><p class="blurb">Containers are sealed. A volume punches a hole so the container can read a folder on your laptop.</p><div class="say"><p>There is a file called <code>whoami.py</code> in your <code>project</code> folder. We are going to
+        run it with a Python container &mdash; <b>without</b> installing Python and <b>without</b> building anything.</p></div><div class="step"><div class="step-head"><span class="tick" data-tick="c35" title="mark as done">&#10003;</span><h3>Run your local script inside a container</h3></div><p class="why"><code>-v &lt;folder on your laptop&gt;:&lt;folder in the container&gt;</code> mounts your current folder into the container at <code>/app</code>. Then we tell the container to run the file it now finds there.</p><div class="cmdwrap os-win"><pre class="cmd"><code>docker run --rm -v &quot;${PWD}:/app&quot; python:3.11-slim python /app/whoami.py</code></pre><button class="copy" type="button" data-copy="docker run --rm -v &quot;${PWD}:/app&quot; python:3.11-slim python /app/whoami.py">Copy</button></div><div class="cmdwrap os-nix"><pre class="cmd"><code>docker run --rm -v &quot;$(pwd):/app&quot; python:3.11-slim python /app/whoami.py</code></pre><button class="copy" type="button" data-copy="docker run --rm -v &quot;$(pwd):/app&quot; python:3.11-slim python /app/whoami.py">Copy</button></div><details class="out"><summary>What you should see</summary><pre class="outpre">  Hello! I am a Python script running in Docker
+  Python version : 3.11.x
+  Machine name   : 7f3a2b1c9d8e   &lt;- container ID</pre></details></div><div class="box tip"><div class="box-title">&#128161; What <code>${PWD}</code> / <code>$(pwd)</code> means</div><p>It is your terminal saying &ldquo;the folder I am currently in&rdquo;. That is why Step&nbsp;2
+            (<code>cd project</code>) mattered. If you are in the wrong folder, the container mounts the wrong
+            folder and Python reports <i>can't open file '/app/whoami.py'</i>.</p></div><div class="box ok"><div class="box-title">&#9989; Real-world use</div><p>This is how you test code against another Python version in 5 seconds, and
+        how databases keep their data alive when the container is deleted. Volumes = the container's link to the
+        outside world.</p></div></section><section id="build"><div class="sec-head"><span class="num">10</span><h2>Build your own image</h2><span class="time">&#9201; 18 min</span></div><p class="blurb">The main event. We turn our FastAPI app into an image anyone in the world can run.</p><div class="say"><p>A <b>Dockerfile</b> is a recipe. <code>docker build</code> follows the recipe and bakes an
+        <b>image</b>. Open <code>project/Dockerfile</code> in your editor &mdash; here it is:</p></div><div class="filebox"><div class="filebox-head"><span>&#128196; project/Dockerfile</span><button class="copy small" type="button" data-copy="# ---------------------------------------------------------------
+#  Week 18 - Day 1 : our first Dockerfile
+#  A Dockerfile is a RECIPE. `docker build` bakes it into an IMAGE.
+#  Every line below becomes one LAYER of that image.
+# ---------------------------------------------------------------
+
+# 1. Start from an official image that already has Python inside.
+FROM python:3.11-slim
+
+# 2. Every command after this runs inside /app in the container.
+WORKDIR /app
+
+# 3. Copy ONLY requirements first. Why? Layer caching:
+#    if your code changes but requirements don&#x27;t, Docker reuses
+#    the cached pip layer and the rebuild takes ~1 second.
+COPY requirements.txt .
+
+# 4. Install the dependencies inside the image.
+#    --no-cache-dir keeps the image small.
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 5. Now copy the application code (this is what changes most often).
+COPY app.py .
+
+# 6. Documentation: this app listens on port 8000.
+EXPOSE 8000
+
+# 7. The command that runs when the container starts.
+#    --host 0.0.0.0 is REQUIRED: 127.0.0.1 inside a container
+#    would only be reachable from inside the container itself.
+CMD [&quot;uvicorn&quot;, &quot;app:app&quot;, &quot;--host&quot;, &quot;0.0.0.0&quot;, &quot;--port&quot;, &quot;8000&quot;]
+">Copy</button></div><pre class="filepre"><code># ---------------------------------------------------------------
+#  Week 18 - Day 1 : our first Dockerfile
+#  A Dockerfile is a RECIPE. `docker build` bakes it into an IMAGE.
+#  Every line below becomes one LAYER of that image.
+# ---------------------------------------------------------------
+
+# 1. Start from an official image that already has Python inside.
+FROM python:3.11-slim
+
+# 2. Every command after this runs inside /app in the container.
+WORKDIR /app
+
+# 3. Copy ONLY requirements first. Why? Layer caching:
+#    if your code changes but requirements don&#x27;t, Docker reuses
+#    the cached pip layer and the rebuild takes ~1 second.
+COPY requirements.txt .
+
+# 4. Install the dependencies inside the image.
+#    --no-cache-dir keeps the image small.
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 5. Now copy the application code (this is what changes most often).
+COPY app.py .
+
+# 6. Documentation: this app listens on port 8000.
+EXPOSE 8000
+
+# 7. The command that runs when the container starts.
+#    --host 0.0.0.0 is REQUIRED: 127.0.0.1 inside a container
+#    would only be reachable from inside the container itself.
+CMD [&quot;uvicorn&quot;, &quot;app:app&quot;, &quot;--host&quot;, &quot;0.0.0.0&quot;, &quot;--port&quot;, &quot;8000&quot;]
+</code></pre></div><div class="box tip"><div class="box-title">&#128161; The one line beginners always get wrong</div><p><code>--host 0.0.0.0</code> in the last line. Inside a container, <code>127.0.0.1</code> means
+            &ldquo;only this container&rdquo;, so your browser would never reach it. <code>0.0.0.0</code> means
+            &ldquo;accept connections from outside too&rdquo;. Forget it and you get an empty browser page with a
+            perfectly healthy-looking container.</p></div><div class="step"><div class="step-head"><span class="tick" data-tick="c36" title="mark as done">&#10003;</span><h3>Build the image</h3></div><p class="why"><code>-t docker-demo:v1</code> names and tags it &middot; the <code>.</code> at the end means &ldquo;the recipe and the files are in <b>this</b> folder&rdquo;. Watch the numbered steps scroll past &mdash; each one is a layer.</p><div class="cmdwrap "><pre class="cmd"><code>docker build -t docker-demo:v1 .</code></pre><button class="copy" type="button" data-copy="docker build -t docker-demo:v1 .">Copy</button></div><details class="out"><summary>What you should see</summary><pre class="outpre">=&gt; [1/5] FROM python:3.11-slim
+=&gt; [2/5] WORKDIR /app
+=&gt; [3/5] COPY requirements.txt .
+=&gt; [4/5] RUN pip install --no-cache-dir -r requirements.txt
+=&gt; [5/5] COPY app.py .
+=&gt; naming to docker.io/library/docker-demo:v1</pre></details></div><div class="step"><div class="step-head"><span class="tick" data-tick="c37" title="mark as done">&#10003;</span><h3>Find your image in the list</h3></div><p class="why">It is yours, it is local, and it is a first-class image exactly like the ones you downloaded.</p><div class="cmdwrap "><pre class="cmd"><code>docker images docker-demo</code></pre><button class="copy" type="button" data-copy="docker images docker-demo">Copy</button></div></div><div class="step"><div class="step-head"><span class="tick" data-tick="c38" title="mark as done">&#10003;</span><h3>Run your image</h3></div><p class="why">Same flags as nginx: background, port 8000 mapped to 8000, with a name.</p><div class="cmdwrap "><pre class="cmd"><code>docker run -d -p 8000:8000 --name demo-api docker-demo:v1</code></pre><button class="copy" type="button" data-copy="docker run -d -p 8000:8000 --name demo-api docker-demo:v1">Copy</button></div></div><div class="box ok"><div class="box-title">&#9989; Open your app &#127881;</div><p><a href="http://localhost:8000" target="_blank" rel="noopener">http://localhost:8000</a>
+        &mdash; then try <a href="http://localhost:8000/health" target="_blank" rel="noopener">/health</a> and
+        <a href="http://localhost:8000/predict?value=21" target="_blank" rel="noopener">/predict?value=21</a>.</p>
+        <p>Also try <a href="http://localhost:8000/docs" target="_blank" rel="noopener">/docs</a> &mdash; FastAPI's
+        automatic API documentation, running inside your container.</p></div><div class="step"><div class="step-head"><span class="tick" data-tick="c39" title="mark as done">&#10003;</span><h3>Test it from the terminal too</h3></div><p class="why">The same check a monitoring system or a deployment pipeline would run.</p><div class="cmdwrap os-win"><pre class="cmd"><code>curl.exe http://localhost:8000/health</code></pre><button class="copy" type="button" data-copy="curl.exe http://localhost:8000/health">Copy</button></div><div class="cmdwrap os-nix"><pre class="cmd"><code>curl http://localhost:8000/health</code></pre><button class="copy" type="button" data-copy="curl http://localhost:8000/health">Copy</button></div><details class="out"><summary>What you should see</summary><pre class="outpre">{&quot;status&quot;:&quot;healthy&quot;}</pre></details><p class="note">&#9432; On Windows it must be <code>curl.exe</code> &mdash; plain <code>curl</code> in PowerShell is a different, older command.</p></div><div class="step"><div class="step-head"><span class="tick" data-tick="c40" title="mark as done">&#10003;</span><h3>Read your app's logs</h3></div><p class="why">Every request you made from the browser is in there. First stop for any bug.</p><div class="cmdwrap "><pre class="cmd"><code>docker logs demo-api</code></pre><button class="copy" type="button" data-copy="docker logs demo-api">Copy</button></div></div><div class="step"><div class="step-head"><span class="tick" data-tick="c41" title="mark as done">&#10003;</span><h3>Step inside your own running container</h3></div><p class="why">Opens a shell in the container that is <b>already running</b>. <code>exec</code> = run an extra command in an existing container (<code>run</code> would create a brand new one).</p><div class="cmdwrap "><pre class="cmd"><code>docker exec -it demo-api bash</code></pre><button class="copy" type="button" data-copy="docker exec -it demo-api bash">Copy</button></div></div><div class="step inside"><div class="step-head"><span class="tick" data-tick="c42" title="mark as done">&#10003;</span><h3>Look at what you shipped<span class="tag-inside">inside container</span></h3></div><p class="why">Your <code>app.py</code> and <code>requirements.txt</code> are in <code>/app</code> exactly as the Dockerfile promised.</p><div class="cmdwrap "><pre class="cmd"><code>ls -l /app</code></pre><button class="copy" type="button" data-copy="ls -l /app">Copy</button></div></div><div class="step inside"><div class="step-head"><span class="tick" data-tick="c43" title="mark as done">&#10003;</span><h3>Leave again<span class="tag-inside">inside container</span></h3></div><p class="why">Type this to get out. The container keeps running &mdash; you only ended the extra shell.</p><div class="cmdwrap "><pre class="cmd"><code>exit</code></pre><button class="copy" type="button" data-copy="exit">Copy</button></div></div><div class="say"><h4>Now change its behaviour without rebuilding</h4>
+        <p>The app reads an environment variable called <code>GREETING</code>. Environment variables are how you
+        configure the same image differently in dev, staging and production.</p></div><div class="step"><div class="step-head"><span class="tick" data-tick="c44" title="mark as done">&#10003;</span><h3>Remove the old container</h3></div><p class="why">A name can only be used once, so free it up first.</p><div class="cmdwrap "><pre class="cmd"><code>docker rm -f demo-api</code></pre><button class="copy" type="button" data-copy="docker rm -f demo-api">Copy</button></div></div><div class="step"><div class="step-head"><span class="tick" data-tick="c45" title="mark as done">&#10003;</span><h3>Run it again with your own message</h3></div><p class="why"><code>-e NAME=value</code> passes an environment variable in. Put your own name in the quotes, then refresh <a href='http://localhost:8000' target='_blank' rel='noopener'>http://localhost:8000</a>.</p><div class="cmdwrap "><pre class="cmd"><code>docker run -d -p 8000:8000 -e GREETING=&quot;Hello from YOUR NAME&quot; --name demo-api docker-demo:v1</code></pre><button class="copy" type="button" data-copy="docker run -d -p 8000:8000 -e GREETING=&quot;Hello from YOUR NAME&quot; --name demo-api docker-demo:v1">Copy</button></div></div></section><section id="cache"><div class="sec-head"><span class="num">11</span><h2>Layer caching &mdash; why the second build is instant</h2><span class="time">&#9201; 6 min</span></div><p class="blurb">This is the trick that makes Docker usable day to day.</p><div class="say"><p>Open <code>project/app.py</code> in your editor. Find the line that says
+        <code>&lt;h1 style="margin:8px 0"&gt;It works!&lt;/h1&gt;</code> and change the text to something of your own.
+        <b>Save the file.</b></p></div><div class="step"><div class="step-head"><span class="tick" data-tick="c46" title="mark as done">&#10003;</span><h3>Build again, as version 2</h3></div><p class="why">Watch the output closely: the pip install step says <b>CACHED</b>. Docker knows <code>requirements.txt</code> did not change, so it reuses that layer and only redoes the <code>COPY app.py</code> step. Seconds instead of minutes.</p><div class="cmdwrap "><pre class="cmd"><code>docker build -t docker-demo:v2 .</code></pre><button class="copy" type="button" data-copy="docker build -t docker-demo:v2 .">Copy</button></div><details class="out"><summary>What you should see</summary><pre class="outpre">=&gt; CACHED [4/5] RUN pip install --no-cache-dir -r requirements.txt
+=&gt; [5/5] COPY app.py .
+=&gt; naming to docker.io/library/docker-demo:v2</pre></details></div><div class="box tip"><div class="box-title">&#128161; That is why the Dockerfile copies requirements first</div><p>If we had copied all the code before installing the packages, every one-character code change
+            would throw away the cache and reinstall every dependency from scratch. Cheap rule, huge payoff:
+            <b>put the things that rarely change at the top of your Dockerfile.</b></p></div><div class="step"><div class="step-head"><span class="tick" data-tick="c47" title="mark as done">&#10003;</span><h3>Remove the old container</h3></div><p class="why">The name <code>demo-api</code> is still taken by the v1 container.</p><div class="cmdwrap "><pre class="cmd"><code>docker rm -f demo-api</code></pre><button class="copy" type="button" data-copy="docker rm -f demo-api">Copy</button></div></div><div class="step"><div class="step-head"><span class="tick" data-tick="c48" title="mark as done">&#10003;</span><h3>Start a container from your new image</h3></div><p class="why">Same command as before but with the <code>:v2</code> tag. Refresh <a href='http://localhost:8000' target='_blank' rel='noopener'>http://localhost:8000</a> to see your edit live.</p><div class="cmdwrap "><pre class="cmd"><code>docker run -d -p 8000:8000 --name demo-api docker-demo:v2</code></pre><button class="copy" type="button" data-copy="docker run -d -p 8000:8000 --name demo-api docker-demo:v2">Copy</button></div></div><div class="step"><div class="step-head"><span class="tick" data-tick="c49" title="mark as done">&#10003;</span><h3>See both versions side by side</h3></div><p class="why">Two tags, two images, both yours. Rolling back is just running <code>:v1</code> again &mdash; this is how real deployments undo a bad release.</p><div class="cmdwrap "><pre class="cmd"><code>docker images docker-demo</code></pre><button class="copy" type="button" data-copy="docker images docker-demo">Copy</button></div></div></section><section id="cleanup"><div class="sec-head"><span class="num">12</span><h2>Clean up</h2><span class="time">&#9201; 5 min</span></div><p class="blurb">Docker never deletes anything on its own. Do this or your disk fills up.</p><div class="step"><div class="step-head"><span class="tick" data-tick="c50" title="mark as done">&#10003;</span><h3>See everything you created today</h3></div><p class="why">Running and stopped.</p><div class="cmdwrap "><pre class="cmd"><code>docker ps -a</code></pre><button class="copy" type="button" data-copy="docker ps -a">Copy</button></div></div><div class="step"><div class="step-head"><span class="tick" data-tick="c51" title="mark as done">&#10003;</span><h3>Remove today's containers</h3></div><p class="why">Force-removes both by name. Errors about containers you already deleted are harmless.</p><div class="cmdwrap "><pre class="cmd"><code>docker rm -f demo-api my-nginx</code></pre><button class="copy" type="button" data-copy="docker rm -f demo-api my-nginx">Copy</button></div></div><div class="step"><div class="step-head"><span class="tick" data-tick="c52" title="mark as done">&#10003;</span><h3>Check how much disk Docker is using</h3></div><p class="why">Images, containers, volumes and build cache. The RECLAIMABLE column is what you can get back.</p><div class="cmdwrap "><pre class="cmd"><code>docker system df</code></pre><button class="copy" type="button" data-copy="docker system df">Copy</button></div></div><div class="step"><div class="step-head"><span class="tick" data-tick="c53" title="mark as done">&#10003;</span><h3>Delete all stopped containers</h3></div><p class="why">Safe: only removes containers that are not running.</p><div class="cmdwrap "><pre class="cmd"><code>docker container prune -f</code></pre><button class="copy" type="button" data-copy="docker container prune -f">Copy</button></div></div><div class="step"><div class="step-head"><span class="tick" data-tick="c54" title="mark as done">&#10003;</span><h3>Optional &mdash; also delete unused images</h3></div><p class="why">Frees the most space, but you will have to re-download those images next time. <b>Skip this if your internet is slow</b> &mdash; you will want these images for Day 2.</p><div class="cmdwrap "><pre class="cmd"><code>docker image prune -a -f</code></pre><button class="copy" type="button" data-copy="docker image prune -a -f">Copy</button></div><p class="note">&#9432; Only run this if you are short on disk space.</p></div></section><section id="cheatsheet"><div class="sec-head"><span class="num">13</span><h2>Cheat sheet</h2><span class="time">&#9201; &mdash;</span></div><p class="blurb">The 20 commands that cover 95% of daily Docker use.</p><table class="cheat"><tbody><tr class="grouprow"><td colspan="2">IMAGES</td></tr><tr><td><code>docker pull <i>name:tag</i></code></td><td>Download an image</td></tr><tr><td><code>docker images</code></td><td>List images you have</td></tr><tr><td><code>docker build -t <i>name:tag</i> .</code></td><td>Build an image from the Dockerfile here</td></tr><tr><td><code>docker rmi <i>name:tag</i></code></td><td>Delete an image</td></tr><tr class="grouprow"><td colspan="2">RUNNING</td></tr><tr><td><code>docker run <i>image</i></code></td><td>Create + start a container</td></tr><tr><td><code>docker run -d <i>image</i></code></td><td>&hellip; in the background (detached)</td></tr><tr><td><code>docker run -p 8000:8000 <i>image</i></code></td><td>&hellip; mapping host port : container port</td></tr><tr><td><code>docker run --name <i>api</i> <i>image</i></code></td><td>&hellip; with a memorable name</td></tr><tr><td><code>docker run -e KEY=value <i>image</i></code></td><td>&hellip; with an environment variable</td></tr><tr><td><code>docker run -v <i>host</i>:<i>container</i> <i>image</i></code></td><td>&hellip; with a folder mounted in</td></tr><tr><td><code>docker run -it <i>image</i> bash</code></td><td>&hellip; interactively, with a shell</td></tr><tr><td><code>docker run --rm <i>image</i></code></td><td>&hellip; and auto-delete it when it exits</td></tr><tr class="grouprow"><td colspan="2">MANAGING</td></tr><tr><td><code>docker ps</code></td><td>List running containers</td></tr><tr><td><code>docker ps -a</code></td><td>List all containers, including stopped</td></tr><tr><td><code>docker logs <i>name</i></code></td><td>Show a container's output</td></tr><tr><td><code>docker logs -f <i>name</i></code></td><td>Follow the output live</td></tr><tr><td><code>docker exec -it <i>name</i> bash</code></td><td>Get a shell in a running container</td></tr><tr><td><code>docker stop / start <i>name</i></code></td><td>Stop or restart a container</td></tr><tr><td><code>docker rm -f <i>name</i></code></td><td>Delete a container</td></tr><tr class="grouprow"><td colspan="2">CLEANING</td></tr><tr><td><code>docker system df</code></td><td>How much disk is Docker using?</td></tr><tr><td><code>docker container prune -f</code></td><td>Delete all stopped containers</td></tr><tr><td><code>docker image prune -a -f</code></td><td>Delete all unused images</td></tr></tbody></table></section><section id="challenge"><div class="sec-head"><span class="num">14</span><h2>Challenge / homework</h2><span class="time">&#9201; &mdash;</span></div><p class="blurb">Do this at home. It is Day 2's starting point.</p><div class="say"><p>Take the app in <code>project/</code> and make it your own:</p>
+        <ol>
+          <li>Add a new endpoint <code>GET /model-info</code> that returns the model name, version and author (you).</li>
+          <li>Make <code>/predict</code> multiply by a number read from an environment variable called
+              <code>FACTOR</code> instead of always doubling (hint: <code>os.getenv("FACTOR", "2")</code>).</li>
+          <li>Rebuild as <code>docker-demo:v3</code>.</li>
+          <li>Run it with <code>-e FACTOR=10</code> and prove it works in the browser.</li>
+        </ol>
+        <p><b>Stretch goal:</b> take your own FastAPI project from Week&nbsp;17 and write a Dockerfile for it.
+        That is literally the Week&nbsp;18 project.</p></div><div class="box tip"><div class="box-title">&#128161; How to debug it when it breaks</div><ol>
+          <li><code>docker ps -a</code> &mdash; did the container even stay up?</li>
+          <li><code>docker logs &lt;name&gt;</code> &mdash; the Python error will be right there</li>
+          <li>Fix <code>app.py</code>, then <b>rebuild</b> &mdash; editing the file does not change the image</li>
+        </ol>
+        <p>That third point catches everyone: an image is a frozen snapshot. Change code &rarr; rebuild &rarr; rerun.</p></div></section><section id="trouble"><div class="sec-head"><span class="num">15</span><h2>Troubleshooting &mdash; every error you might hit</h2><span class="time">&#9201; &mdash;</span></div><p class="blurb">Find your error message here before asking.</p><table class="trouble"><thead><tr><th>You see this</th><th>Do this</th></tr></thead><tbody><tr><td class="err">Cannot connect to the Docker daemon<br>error during connect ... docker_engine</td><td>Docker Desktop is not running (Windows/Mac): open it from the Start menu and wait until the whale icon stops animating. On Linux: <code>sudo systemctl start docker</code></td></tr><tr><td class="err">permission denied while trying to connect to the Docker daemon socket <span class='osnote'>(Linux)</span></td><td><code>sudo usermod -aG docker $USER</code> then log out and back in. As a one-off you can put <code>sudo</code> in front of the docker command.</td></tr><tr><td class="err">Bind for 0.0.0.0:8000 failed: port is already allocated</td><td>Something else is already using that port &mdash; often a container you forgot. Run <code>docker ps</code>, then <code>docker rm -f &lt;name&gt;</code>. Or just use a different port on your side: <code>-p 8001:8000</code> and browse to :8001.</td></tr><tr><td class="err">The container name &quot;/demo-api&quot; is already in use</td><td>You already have a container with that name. <code>docker rm -f demo-api</code> then run again.</td></tr><tr><td class="err">The browser shows &quot;can't be reached&quot; but <code>docker ps</code> says it's running</td><td>Three usual causes: (1) the <code>-p</code> numbers are the wrong way round, (2) the app inside is bound to 127.0.0.1 instead of 0.0.0.0, (3) you are using the wrong port in the URL. Check <code>docker logs &lt;name&gt;</code>.</td></tr><tr><td class="err"><code>py</code> or <code>python</code> is not recognised <span class='osnote'>(Windows)</span></td><td>Try the other one. If Windows opens the Microsoft Store instead, install Python from <a href='https://www.python.org/downloads/' target='_blank' rel='noopener'>python.org</a> and tick <b>&ldquo;Add python.exe to PATH&rdquo;</b> during install.</td></tr><tr><td class="err">Activate.ps1 cannot be loaded because running scripts is disabled <span class='osnote'>(Windows)</span></td><td>Run <code>Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force</code> first, then activate again. It only affects that one window.</td></tr><tr><td class="err">ensurepip is not available <span class='osnote'>(Ubuntu)</span></td><td><code>sudo apt install -y python3-venv</code> then create the virtual environment again.</td></tr><tr><td class="err"><code>docker run -it</code> hangs or shows garbage <span class='osnote'>(Windows)</span></td><td>You are in Git Bash. Use PowerShell instead. (If you must use Git Bash, prefix with <code>winpty</code>.)</td></tr><tr><td class="err">can't open file '/app/whoami.py'</td><td>Your terminal is not in the <code>project</code> folder, so <code>${PWD}</code> pointed somewhere else. <code>cd</code> into <code>project</code> and try again.</td></tr><tr><td class="err">The pull is crawling / the wifi is dying</td><td>Ask the instructor for the offline image file, or use <a href='https://labs.play-with-docker.com' target='_blank' rel='noopener'>labs.play-with-docker.com</a> to follow along in the browser.</td></tr><tr><td class="err">Ctrl+C doesn't stop my container</td><td>If you started it with <code>-d</code> it is in the background &mdash; Ctrl+C only stops the log view. Use <code>docker stop &lt;name&gt;</code>.</td></tr><tr><td class="err">I edited app.py but nothing changed</td><td>An image is a snapshot taken at build time. You must <code>docker build</code> again, then remove and rerun the container.</td></tr></tbody></table></section></main>
+</div>
+
+<footer>Week 18 &middot; Day 1 &mdash; Docker Fundamentals &nbsp;&middot;&nbsp; keep this page open all session &nbsp;&middot;&nbsp; next: Dockerfiles for ML &amp; Docker Compose</footer>
+<script>
+(function(){
+  var store = {
+    get: function(k){ try { return localStorage.getItem(k); } catch(e){ return null; } },
+    set: function(k,v){ try { localStorage.setItem(k,v); } catch(e){} }
+  };
+
+  /* --- operating system ------------------------------------------- */
+  function setOS(os){
+    document.body.setAttribute('data-os', os);
+    var btns = document.querySelectorAll('.osbtn');
+    for (var i=0;i<btns.length;i++){
+      btns[i].className = 'osbtn' + (btns[i].getAttribute('data-os')===os ? ' on' : '');
+    }
+    store.set('dockerclass-os', os);
+  }
+  setOS(store.get('dockerclass-os') ||
+        (/Win/i.test(navigator.platform||navigator.userAgent) ? 'win' : 'nix'));
+
+  /* --- day / night ------------------------------------------------- */
+  function setTheme(theme){
+    document.body.setAttribute('data-theme', theme);
+    var b = document.getElementById('themebtn');
+    if (b) b.innerHTML = (theme==='light') ? '☾ Night mode' : '☀ Day mode';
+    store.set('dockerclass-theme', theme);
+  }
+  var savedTheme = store.get('dockerclass-theme');
+  if (!savedTheme) {
+    var prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+    savedTheme = prefersLight ? 'light' : 'dark';
+  }
+  setTheme(savedTheme);
+
+  /* --- copy to clipboard ------------------------------------------- */
+  function fallbackCopy(text, ok, fail){
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly','');
+    ta.style.position='fixed'; ta.style.top='0'; ta.style.left='0'; ta.style.opacity='0';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select(); ta.setSelectionRange(0, text.length);
+    var done = false;
+    try { done = document.execCommand('copy'); } catch(e){ done = false; }
+    document.body.removeChild(ta);
+    done ? ok() : fail();
+  }
+
+  function flash(btn){
+    var old = btn.textContent;
+    btn.textContent = 'Copied!';
+    btn.className = btn.className.indexOf('small')>-1 ? 'copy small ok' : 'copy ok';
+    setTimeout(function(){
+      btn.textContent = old;
+      btn.className = btn.className.replace(' ok','');
+    }, 1300);
+  }
+
+  document.addEventListener('click', function(ev){
+    var t = ev.target;
+
+    if (t.id === 'themebtn') {
+      setTheme(document.body.getAttribute('data-theme')==='light' ? 'dark' : 'light');
+      return;
+    }
+
+    if (t.classList && t.classList.contains('osbtn')) { setOS(t.getAttribute('data-os')); return; }
+
+    if (t.classList && t.classList.contains('tick')) {
+      var step = t.closest ? t.closest('.step') : null;
+      if (step) step.classList.toggle('done');
+      return;
+    }
+
+    if (t.classList && t.classList.contains('copy')) {
+      var text = t.getAttribute('data-copy');
+      var ok = function(){ flash(t); };
+      var fail = function(){ window.prompt('Copy this command with Ctrl+C:', text); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(ok, function(){ fallbackCopy(text, ok, fail); });
+      } else {
+        fallbackCopy(text, ok, fail);
+      }
+      return;
+    }
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+# Week 18 - Day 1 : dependencies for our demo API
+# Install them with:  pip install -r requirements.txt
+# Versions are pinned so everybody in the room gets the exact same thing.
+fastapi==0.141.1
+uvicorn==0.53.0
+numpy==2.5.3
+pandas==3.0.6

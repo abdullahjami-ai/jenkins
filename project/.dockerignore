@@ -1,0 +1,9 @@
+# Files listed here are NOT copied into the image.
+# Keeps images small and stops secrets leaking into them.
+.venv/
+venv/
+__pycache__/
+*.pyc
+.git/
+.env
+*.md
